@@ -3,6 +3,7 @@ import time, os, copy
 
 def min_max_mulitple_ghosts(problem, k):
     #Your p5 code here
+    searchK(problem, k)
     solution = ''
     winner = ''
     return solution, winner
@@ -22,7 +23,7 @@ def searchK(problem, k):
                 directions = get_parameters(node[0]['size'], node[0]['pacman'], node[0]['ghosts'], node[0]['walls'])
                 for dir in directions:
                     problem_copy, score, is_win, is_lose = simulate(node[0], node[2], dir, 'pacman')
-                    new_path = copy.copy(node[2])
+                    new_path = copy.copy(node[1])
                     new_path.append(dir)
                     if is_win or is_lose:
                         frontier.append((problem_copy, new_path, score, True))
@@ -31,12 +32,37 @@ def searchK(problem, k):
 
             else:
                 is_pacman_turn = True
+                dir_list = []
                 for ghost in node[0]['ghosts']:
-                    dir = get_parameters(node[0]['size'], ghost, node[0]['ghosts'], isGhost=True)
+                    dirs = get_parameters(node[0]['size'], ghost[1], node[0]['walls'], node[0]['ghosts'], isGhost=True)
+                    dir_list.append(dirs)
 
+                joined_list = []
+                for item in dir_list[0]:
+                    joined_list.append([item])
+                for j in range(1, len(dir_list)):
+                    new_joined_list = []
+                    for i in range(len(joined_list)):
+                        for item in dir_list[j]:
+                            temp = copy.copy(joined_list[i])
+                            temp.append(item)
+                            new_joined_list.append(temp)
+
+                    joined_list = new_joined_list
+
+                for parameters in joined_list:
+                    problem_copy, score, is_win, is_lose = simulate(node[0], node[2], parameters, 'ghost')
+                    new_path = copy.copy(node[1])
+                    new_path.append(parameters)
+                    if is_win or is_lose:
+                        frontier.append((problem_copy, new_path, score, True))
+                    else:
+                        frontier.append((problem_copy, new_path, score, False))
 
         else:
             frontier.append(node)
+
+    print(frontier[10])
 
 
 def simulate(problem, score, instruction, flag):
