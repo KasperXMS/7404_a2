@@ -18,7 +18,7 @@ def better_play_single_ghosts(problem):
     while not isWin and not isLose:
         if is_pacman_turn:
             is_pacman_turn = False
-            parameters = get_parameters(problem['size'], problem['pacman'], problem['walls'], problem['ghosts'])
+            parameters = get_parameters(problem['pacman'], problem['walls'], problem['ghosts'])
             dir = evaluate_choice(problem['pacman'], problem['ghosts'], problem['foods'], problem['walls'], parameters)
             move(dir, problem['pacman'])
             solution += "{}: P moving {}\n".format(num, dir)
@@ -50,7 +50,7 @@ def better_play_single_ghosts(problem):
         else:
             is_pacman_turn = True
             for ghost in problem['ghosts']:
-                parameters = get_parameters(problem['size'], ghost[1], problem['walls'], problem['ghosts'],
+                parameters = get_parameters(ghost[1], problem['walls'], problem['ghosts'],
                                             isGhost=True)
                 if len(parameters) > 0:
                     dir = random.choice(parameters)
@@ -148,7 +148,7 @@ def get_min_distance(pacman, location_list, walls):
     return len(result) - 1
 
 
-def get_parameters(size, location, walls, ghosts, isGhost=False):
+def get_parameters(location, walls, ghosts, isGhost=False):
     parameters = []
     ghost_locs = []
     for ghost in ghosts:

@@ -3,66 +3,48 @@ import time, os, copy
 
 def min_max_mulitple_ghosts(problem, k):
     #Your p5 code here
-    searchK(problem, k)
     solution = ''
     winner = ''
     return solution, winner
 
-def searchK(problem, k):
-    frontier = collections.deque([(problem, [], 0, False)])
-    is_pacman_turn = True
-    while True:
-        node = frontier.popleft()
-        if len(node[1]) == k:
-            frontier.append(node)
-            break
+class Node:
+    problem = {}
+    action = ''
+    children = []
+    score = 0
+    terminate_flag = False
 
-        if not node[3]:
-            if is_pacman_turn:
-                is_pacman_turn = False
-                directions = get_parameters(node[0]['size'], node[0]['pacman'], node[0]['ghosts'], node[0]['walls'])
-                for dir in directions:
-                    problem_copy, score, is_win, is_lose = simulate(node[0], node[2], dir, 'pacman')
-                    new_path = copy.copy(node[1])
-                    new_path.append(dir)
-                    if is_win or is_lose:
-                        frontier.append((problem_copy, new_path, score, True))
-                    else:
-                        frontier.append((problem_copy, new_path, score, False))
+    def __init__(self, problem, action, score):
+        self.problem = problem
+        self.action = action
+        self.score = score
 
+    def add_child(self, child_node):
+        self.children.append(child_node)
+
+def search_k(problem, k):
+    root = Node(problem, '', 0)
+
+
+def build_pacman_node(node, index, k):
+    if index < k and not node.terminate_flag:
+        parameter = get_parameters(node.problem['pacman'], node.problem['walls'], node.problem['ghosts'])
+        for dir in parameter:
+            new_problem, score, is_win, is_lose = simulate(node.problem, node.score, dir, 'pacman')
+            new_node = Node(new_problem, dir, score)
+            node.add_child(new_node)
+            if is_win or is_lose:
+                new_node.terminate_flag = True
             else:
-                is_pacman_turn = True
-                dir_list = []
-                for ghost in node[0]['ghosts']:
-                    dirs = get_parameters(node[0]['size'], ghost[1], node[0]['walls'], node[0]['ghosts'], isGhost=True)
-                    dir_list.append(dirs)
+                build_ghosts_node(new_node, index + 1, k)
 
-                joined_list = []
-                for item in dir_list[0]:
-                    joined_list.append([item])
-                for j in range(1, len(dir_list)):
-                    new_joined_list = []
-                    for i in range(len(joined_list)):
-                        for item in dir_list[j]:
-                            temp = copy.copy(joined_list[i])
-                            temp.append(item)
-                            new_joined_list.append(temp)
+def build_ghosts_node(node, index, k):
+    if index < k and not node.terminate_flag:
+        raw_parameter = []
+        for ghosts in node.problem['ghosts']:
+            parameter = get_parameters(ghosts[1], node.problem['walls'], node.problem['ghosts'], isGhost=True)
+            raw_parameter.append(parameter)
 
-                    joined_list = new_joined_list
-
-                for parameters in joined_list:
-                    problem_copy, score, is_win, is_lose = simulate(node[0], node[2], parameters, 'ghost')
-                    new_path = copy.copy(node[1])
-                    new_path.append(parameters)
-                    if is_win or is_lose:
-                        frontier.append((problem_copy, new_path, score, True))
-                    else:
-                        frontier.append((problem_copy, new_path, score, False))
-
-        else:
-            frontier.append(node)
-
-    print(frontier[10])
 
 
 def simulate(problem, score, instruction, flag):
@@ -108,7 +90,7 @@ def simulate(problem, score, instruction, flag):
 
     return problem_copy, new_score, is_win, is_lose
 
-def get_parameters(size, location, walls, ghosts, isGhost=False):
+def get_parameters(location, walls, ghosts, isGhost=False):
     parameters = []
     ghost_locs = []
     for ghost in ghosts:
@@ -148,6 +130,18 @@ def move(dir, location):
 
     elif dir == 'S':
         location[1] += 1
+
+def join_list(data):
+    result = [[]]
+    for list_pool in data:
+        lis = []
+        for i in result:
+            for j in list_pool:
+                lis.append(i+[j])
+
+        result = lis
+
+    return result
 
 if __name__ == "__main__":
     test_case_id = int(sys.argv[1])    

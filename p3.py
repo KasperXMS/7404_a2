@@ -14,7 +14,7 @@ def random_play_multiple_ghosts(problem):
     while not isWin and not isLose:
         if is_pacman_turn:
             is_pacman_turn = False
-            parameters = get_parameters(problem['size'], problem['pacman'], problem['walls'], problem['ghosts'])
+            parameters = get_parameters(problem['pacman'], problem['walls'], problem['ghosts'])
             dir = random.choice(parameters)
             move(dir, problem['pacman'])
             solution += "{}: P moving {}\n".format(num, dir)
@@ -46,7 +46,7 @@ def random_play_multiple_ghosts(problem):
         else:
             is_pacman_turn = True
             for ghost in problem['ghosts']:
-                parameters = get_parameters(problem['size'], ghost[1], problem['walls'], problem['ghosts'], isGhost=True)
+                parameters = get_parameters(ghost[1], problem['walls'], problem['ghosts'], isGhost=True)
                 if len(parameters) > 0:
                     dir = random.choice(parameters)
                     move(dir, ghost[1])
@@ -88,7 +88,7 @@ def move(dir, location):
         location[1] += 1
 
 
-def get_parameters(size, location, walls, ghosts, isGhost=False):
+def get_parameters(location, walls, ghosts, isGhost=False):
     parameters = []
     ghost_locs = []
     for ghost in ghosts:
